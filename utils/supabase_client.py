@@ -214,6 +214,16 @@ class CentoricetteDB:
             print(f"Errore scambio codice: {e}")
             return None
 
+    def esegui_logout(self) -> bool:
+        """Disconnette l'utente da Supabase e invalida la sessione."""
+        try:
+            self.client.auth.sign_out()
+            return True
+        except Exception as e:
+            print(f"Errore durante il logout: {e}")
+            return False
+
+
 if __name__ == "__main__":
     # Test rapido di inizializzazione
     try:
