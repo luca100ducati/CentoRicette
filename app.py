@@ -111,21 +111,6 @@ def applica_tema():
         ui.button(icon='star', on_click=lambda: ui.navigate.to('/preferiti')).props('flat color=primary size=sm')
 
 
-
-# ==========================================
-# 2. FUNZIONI DI TEMA E NAVIGAZIONE
-# ==========================================
-def applica_tema():
-    ui.colors(primary='#4caf50', secondary='#81c784', accent='#2e7d32', positive='#66bb6a')
-    ui.query('body').classes('p-0 m-0 bg-gray-100')
-    with ui.footer().classes('bg-white border-t border-green-200 p-2 flex justify-around shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.1)] z-50'):
-        ui.button(icon='kitchen', on_click=lambda: ui.navigate.to('/')).props('flat color=primary size=sm')
-        ui.button(icon='shopping_cart', on_click=lambda: ui.navigate.to('/spesa')).props('flat color=primary size=sm')
-        ui.button(icon='group', on_click=lambda: ui.navigate.to('/famiglia')).props('flat color=primary size=sm')
-        ui.button(icon='calendar_month', on_click=lambda: ui.navigate.to('/calendario')).props('flat color=primary size=sm')
-        ui.button(icon='star', on_click=lambda: ui.navigate.to('/preferiti')).props('flat color=primary size=sm')# PAGINA 1: DISPENSA E RICETTA SINGOLA
-
-
 # ==========================================
 @ui.page('/')
 def pagina_dispensa():
