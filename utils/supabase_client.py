@@ -191,6 +191,29 @@ class CentoricetteDB:
             print(f"Errore durante l'eliminazione della ricetta: {e}")
             return False
 
+    def ottieni_url_login_google(self, url_ritorno: str):
+        """Genera l'URL per reindirizzare l'utente ai server di Google."""
+        try:
+            res = self.client.auth.sign_in_with_oauth({
+                "provider": "google",
+                "options": {
+                    "redirect_to": f"{url_ritorno}/auth/callback"
+                }
+            })
+            return res.url
+        except Exception as e:
+            print(f"Errore generazione URL Google: {e}")
+            return None
+
+    def scambia_codice_con_sessione(self, auth_code: str):
+        """Prende il codice restituito da Google e lo trasforma in un utente loggato."""
+        try:
+            res = self.client.auth.exchange_code_for_session({"auth_code": auth_code})
+            return res.user
+        except Exception as e:
+            print(f"Errore scambio codice: {e}")
+            return None
+
 if __name__ == "__main__":
     # Test rapido di inizializzazione
     try:
