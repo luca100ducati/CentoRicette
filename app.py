@@ -80,6 +80,37 @@ def auth_callback(code: str = None):
         ui.button('Riprova', on_click=lambda: ui.navigate.to('/login')).props('outline')
 
 
+# ==========================================
+# 2. FUNZIONI DI TEMA E NAVIGAZIONE
+# ==========================================
+def applica_tema():
+    ui.colors(primary='#4caf50', secondary='#81c784', accent='#2e7d32', positive='#66bb6a')
+    ui.query('body').classes('p-0 m-0 bg-gray-100')
+    
+    # --- NUOVO HEADER CON PULSANTE LOGOUT ---
+    with ui.header().classes('bg-primary text-white p-2 flex justify-between items-center shadow-md z-50'):
+        # Titolo o saluto (se vuoi puoi anche usare l'email con app.storage.user.get('email'))
+        ui.label('🍲 Centoricette').classes('text-xl font-bold ml-2')
+        
+        def disconnetti():
+            # 1. Chiude la sessione su Supabase
+            db.esegui_logout() 
+            # 2. Svuota i cookie di NiceGUI
+            app.storage.user.clear() 
+            # 3. Rimanda alla pagina di login
+            ui.navigate.to('/login')
+            
+        ui.button(icon='logout', on_click=disconnetti).props('flat color=white dense round').classes('mr-2')
+
+    # --- FOOTER ESISTENTE (BARRA IN BASSO) ---
+    with ui.footer().classes('bg-white border-t border-green-200 p-2 flex justify-around shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.1)] z-50'):
+        ui.button(icon='kitchen', on_click=lambda: ui.navigate.to('/')).props('flat color=primary size=sm')
+        ui.button(icon='shopping_cart', on_click=lambda: ui.navigate.to('/spesa')).props('flat color=primary size=sm')
+        ui.button(icon='group', on_click=lambda: ui.navigate.to('/famiglia')).props('flat color=primary size=sm')
+        ui.button(icon='calendar_month', on_click=lambda: ui.navigate.to('/calendario')).props('flat color=primary size=sm')
+        ui.button(icon='star', on_click=lambda: ui.navigate.to('/preferiti')).props('flat color=primary size=sm')
+
+
 
 # ==========================================
 # 2. FUNZIONI DI TEMA E NAVIGAZIONE
