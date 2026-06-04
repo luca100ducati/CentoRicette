@@ -1,4 +1,4 @@
-# 🍲 Centoricette
+# 🍲 CentoRicette
 
 **Centoricette** è una web application intelligente progettata per rivoluzionare l'organizzazione della cucina familiare. Unisce la gestione della dispensa, il calcolo del fabbisogno calorico e la potenza dell'Intelligenza Artificiale per creare menù settimanali su misura, azzerare gli sprechi e semplificare la spesa.
 
