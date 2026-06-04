@@ -1,8 +1,9 @@
-from nicegui import ui
+from nicegui import ui,app
 import json
 from ai_chef import GeminiChef 
 from utils.supabase_client import CentoricetteDB
 from calcolatore import calcola_fabbisogno_giornaliero, calcola_moltiplicatori_porzioni
+import os
 
 # Inizializzazioni
 chef = GeminiChef()
@@ -30,6 +31,56 @@ OPZIONI_SELECT_DISPENSA = {'freschi': '🍅 Freschi', 'congelatore': '🧊 Freez
 
 def non_validi(lista_valori): return any(v is None or v <= 0 for v in lista_valori)
 
+# --- 1. FUNZIONE DI CONTROLLO ACCESSO ---
+# Metti questa funzione in alto, sotto le variabili globali
+def controlla_accesso():
+    """Se l'utente non è loggato, lo rimanda alla pagina di login."""
+    if not app.storage.user.get('autenticato', False):
+        ui.navigate.to('/login')
+        return False
+    return True
+
+
+# --- 2. LA PAGINA DI LOGIN ---
+@ui.page('/login')
+def pagina_login():
+    # Sfondo verde, logo e bottone Google
+    ui.query('body').classes('bg-green-50 p-0 m-0 flex items-center justify-center min-h-screen')
+    with ui.card().classes('w-full max-w-sm p-8 text-center shadow-xl rounded-2xl'):
+        ui.image('logo_100r.png').classes('w-48 mx-auto mb-6')
+        ui.label('Benvenuto in Centoricette').classes('text-2xl font-extrabold text-green-900 mb-2')
+        ui.label('Accedi per gestire la tua dispensa.').classes('text-gray-500 mb-8')
+        
+        def esegui_login():
+            # Prende l'URL del sito dalle variabili (locale o Render)
+            site_url = os.environ.get("SITE_URL", "http://localhost:8080")
+            url_google = db.ottieni_url_login_google(site_url)
+            if url_google:
+                ui.navigate.to(url_google)
+            else:
+                ui.notify("Errore di connessione a Google.", type='negative')
+
+        ui.button('Accedi con Google', icon='login', on_click=esegui_login).classes('w-full font-bold py-3 text-lg').props('rounded color=primary')
+
+# --- 3. LA PAGINA DI CALLBACK (DOVE TORNA GOOGLE) ---
+@ui.page('/auth/callback')
+def auth_callback(code: str = None):
+    if code:
+        utente = db.scambia_codice_con_sessione(code)
+        if utente:
+            # Salviamo nei cookie che l'utente è loggato!
+            app.storage.user['autenticato'] = True
+            app.storage.user['email'] = utente.email
+            ui.navigate.to('/')
+            return
+    
+    # Se qualcosa va storto
+    with ui.column().classes('w-full min-h-screen flex items-center justify-center'):
+        ui.label('Errore durante il login.').classes('text-2xl font-bold text-red-500')
+        ui.button('Riprova', on_click=lambda: ui.navigate.to('/login')).props('outline')
+
+
+
 # ==========================================
 # 2. FUNZIONI DI TEMA E NAVIGAZIONE
 # ==========================================
@@ -47,6 +98,7 @@ def applica_tema():
 # ==========================================
 @ui.page('/')
 def pagina_dispensa():
+    if not controlla_accesso(): return # <-- AGGIUNGI QUESTA RIGA QUI
     applica_tema()
     with ui.column().classes(PAGE_CLASSES):
         ui.image('logo_100r.png').classes('w-full mb-3 drop-shadow-none')
@@ -144,6 +196,7 @@ def pagina_dispensa():
 # ==========================================
 @ui.page('/famiglia')
 def pagina_famiglia():
+    if not controlla_accesso(): return # <-- AGGIUNGI QUESTA RIGA QUI
     applica_tema()
     with ui.column().classes(PAGE_CLASSES):
         ui.image('logo_100r.png').classes('w-full mb-3 drop-shadow-none')
@@ -189,6 +242,7 @@ def pagina_famiglia():
 # ==========================================
 @ui.page('/calendario')
 def pagina_calendario():
+    if not controlla_accesso(): return # <-- AGGIUNGI QUESTA RIGA QUI
     applica_tema()
     stato = {'menu_bozza': {}}
 
@@ -323,6 +377,7 @@ def pagina_calendario():
 # ==========================================
 @ui.page('/preferiti')
 def pagina_preferiti():
+    if not controlla_accesso(): return # <-- AGGIUNGI QUESTA RIGA QUI
     applica_tema()
     
     with ui.column().classes(PAGE_CLASSES):
@@ -369,6 +424,7 @@ def pagina_preferiti():
 # ==========================================
 @ui.page('/spesa')
 def pagina_spesa():
+    if not controlla_accesso(): return # <-- AGGIUNGI QUESTA RIGA QUI
     applica_tema()
     
     with ui.column().classes(PAGE_CLASSES):
@@ -463,4 +519,9 @@ def pagina_stampa():
     ui.timer(0.5, lambda: ui.run_javascript('window.print()'), once=True)
 
 
-ui.run(title="CentoRicette", port=8080, favicon="restaurant-16.ico", viewport='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no')
+# Sostituisci la tua ultima riga ui.run con questa:
+porta = int(os.environ.get('PORT', 8080))
+ui.run(title="Centoricette", port=porta, favicon="restaurant-16.ico", host="0.0.0.0", storage_secret="Metti_Qui_Una_Frase_Segreta_A_Caso_12345", viewport='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no')
+
+
+
